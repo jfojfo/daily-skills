@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 凭证 / 本地环境（key 只从环境变量读，不入库）
+.env
+.env.*
+*.pem
+secrets.*
+
+# 生成产物（脚本默认输出到 /tmp；只有 examples/ 下的示例才提交）
+out/
+output/
+tmp/
+*.tmp
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
