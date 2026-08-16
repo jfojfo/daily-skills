@@ -71,11 +71,19 @@ POST https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/g
 POST https://token.sensenova.cn/v1/images/generations
 ```
 
-响应支持 `data[0].url` 或 `data[0].b64_json`。需要自建兼容网关时设置：
+响应支持 `data[0].url` 或 `data[0].b64_json`。返回 URL 为临时链接，有效期 1 小时，脚本生成后立即下载保存。需要自建兼容网关时设置：
 
 ```bash
 export SENSENOVA_GATEWAY=https://your-gateway.example/v1
 ```
+
+水印控制：payload 中显式传 `watermark`（boolean，官方默认 `true` 为加 Logo 水印）。脚本默认 `false` 去水印，可用环境变量覆盖：
+
+```bash
+export SENSENOVA_WATERMARK=true   # 恢复官方 Logo 水印
+```
+
+去水印当前免费公测，后续将转为付费功能，注意官方计费公告。
 
 脚本会自动补 `/v1`。错误处理：
 
