@@ -13,6 +13,7 @@ Every skill follows the open [Agent Skills](https://agentskills.io) standard, so
 | Skill | What it does | Key needed | Docs |
 | --- | --- | --- | --- |
 | **infographic-gen** | Turns the key points of a doc / SKILL / README into an infographic while preserving the source language. Ships three three-column style templates (cute cartoon, minimal business, tech-dark HUD) plus a library of 100 sample prompts (20+ visual styles, renderable straight from an index) | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **cli-dispatch** | Dispatches tasks to Codex CLI (`codex exec`) or Qoder CLI (`qodercli -p`) non-interactively: task-level selection of model, reasoning effort and sandbox/permission, result parsing from JSONL / JSON output, and session resume | — (local CLI login) | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
 
 ## Infographic examples
 

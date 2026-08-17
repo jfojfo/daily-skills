@@ -13,6 +13,7 @@
 | Skill | 做什么 | 需要的 key | 详细文档 |
 | --- | --- | --- | --- |
 | **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图） | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **cli-dispatch** | 向 Codex CLI（`codex exec`）或 Qoder CLI（`qodercli -p`）非交互派发任务：按任务级别选模型、推理力度和沙箱/权限，解析 JSONL / JSON 结果，支持会话续跑 | —（本地 CLI 登录态） | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
 
 ## 信息图示例
 
