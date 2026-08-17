@@ -1,6 +1,6 @@
 **中文** · [English](./README.md)
 
-# jfo-skills
+# daily-skills
 
 个人 Agent Skill 仓库。每个顶层目录是一个自包含的 skill——一份 `SKILL.md` 加上它自己的脚本与资源。软链到 agent 的 skills 目录后，agent 会自动发现并在合适的时机调用。
 
@@ -13,9 +13,9 @@
 | Skill | 做什么 | 需要的 key | 详细文档 |
 | --- | --- | --- | --- |
 | **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图） | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
-| **cli-dispatch** | 向 Codex CLI（`codex exec`）或 Qoder CLI（`qodercli -p`）非交互派发任务：按任务级别选模型、推理力度和沙箱/权限，解析 JSONL / JSON 结果，支持会话续跑 | —（本地 CLI 登录态） | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
+| **cli-dispatch** | 向 Codex CLI（`codex exec`）、Qoder CLI（`qodercli -p`）、Claude Code（`claude -p`）、Kimi Code（`kimi -p`）或 Qwen Code（`qwen -p`）非交互派发任务：按任务级别选模型、推理力度和沙箱/权限，统一解析结果，支持会话续跑 | —（本地 CLI 登录态） | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
 
-## 信息图示例
+## infographic-gen
 
 ### 内置模板
 
@@ -61,45 +61,7 @@
   </tr>
 </table>
 
-## 安装
-
-### 方式一：让 Agent 自己装
-
-在 Claude Code、Codex 等支持 Agent Skills 的工具里直接说：
-
-```
-帮我安装这个 skill：https://github.com/jfojfo/jfo-skills/tree/main/infographic-gen
-```
-
-Agent 会自己 clone 到对应目录，不用管路径。
-
-### 方式二：clone + 软链
-
-自己还要改 skill 就用这种，仓库里一改所有 agent 立刻生效，不用重新拷贝：
-
-```bash
-git clone https://github.com/jfojfo/jfo-skills.git
-cd jfo-skills && REPO=$(pwd)
-
-# Claude Code
-ln -s "$REPO/infographic-gen" ~/.claude/skills/infographic-gen
-
-# Codex
-ln -s "$REPO/infographic-gen" ~/.codex/skills/infographic-gen
-
-# Qoder
-ln -s "$REPO/infographic-gen" ~/.qoder/skills/infographic-gen
-```
-
-### 卸载
-
-卸载删软链就行，不影响仓库：`rm ~/.claude/skills/infographic-gen`
-
-### Agent 不支持 Skill 怎么办
-
-把 `infographic-gen/SKILL.md` 全文下载下来，当项目规则文件用，或直接贴进对话让 agent 照着执行，效果一致——skill 本身就是一份结构化指令，不依赖任何运行时。
-
-## 环境变量
+### 环境变量
 
 | 变量 | 用途 | 必需性 |
 | --- | --- | --- |
@@ -108,7 +70,7 @@ ln -s "$REPO/infographic-gen" ~/.qoder/skills/infographic-gen
 
 写进 `~/.zshrc` 可持久化。三个脚本都在发请求前检查 key，缺失就退出并说明缺哪个变量，不会拿空 key 去打接口。**图像生成接口会产生费用或消耗免费额度**，批量跑样本库前先确认额度。
 
-## 怎么触发
+### 怎么触发
 
 装好并配完 key，用自然语言说就行，agent 靠 `description` 自动匹配：
 
@@ -126,9 +88,75 @@ ln -s "$REPO/infographic-gen" ~/.qoder/skills/infographic-gen
 
 语言说明：infographic-gen 默认沿用源内容的语言。内置示例同时包含中文、英文和中英混排；图像模型仍可能在高密度文字中产生错字或变形，生成后需要验收成图。
 
-## 仓库体积说明
+### 仓库体积说明
 
 `infographic-gen/examples/` 下的对比示例图是仓库的主要体积来源。只想看文档不需要示例图时可以浅克隆：`git clone --depth 1`。
+
+## cli-dispatch
+
+把任务非交互地派发给 CLI coding agent：选定后端、按 `light` / `medium` / `heavy` 分级后，skill 会组装命令（模型、推理力度、沙箱/权限）、执行、解析结果，并回报可用于后续追问的 session id。
+
+触发示例：
+
+```
+把 auth 模块的重构派发给 codex，heavy 级
+把这个 bug 的修复派发给 qodercli，medium 级
+用 kimi 分析这个目录的模块职责，只读就行
+派发给 claude，跑完报告 session id
+同样的任务再派给 qwen 跑一遍对比
+将代码重构派发给 codex 进行评审，运行危险写、持久session、思考xhigh
+```
+
+也可以显式点名：直接说“用 cli-dispatch skill 将代码重构派发给 codex 进行评审”。
+
+| 后端 | 派发命令 | 写任务需要的权限 | 续跑 | 验证版本 |
+| --- | --- | --- | --- | --- |
+| Codex CLI | `codex exec` | 沙箱逐级提权（`-s workspace-write` … `danger-full-access`） | `codex exec resume <id>` | v0.144.5 |
+| Qoder CLI | `qodercli -p` | `--permission-mode bypass_permissions` | `-r <id>` | v1.1.1 |
+| Claude Code | `claude -p` | `--permission-mode acceptEdits` / `bypassPermissions` | `-r <id>` / `-c` | v2.1.220 |
+| Kimi Code | `kimi -p` | `--yolo` / `--auto` | `-S <id>`（不是 `-r`！） | v0.36.1 |
+| Qwen Code | `qwen -p` | 权限模式在 `~/.qwen/settings.json` 中配置 | `-r <id>` / `-c` | v0.21.12 |
+
+`scripts/parse_events.py` 把五种后端的事件流统一解析成同一个 JSON 对象（`session_id`、`answer`、`usage`、`errors`、`success`），派发侧代码不因后端而异——包括两个特例：qwen 的 `-o json` 输出的是 JSON 数组，kimi 的流里根本没有 `result` 行。所有后端的会话默认持久，后续追问直接复用完整上下文，不必重起。只要求目标 CLI 已安装并登录，不需要 API key。
+
+## 安装
+
+### 方式一：让 Agent 自己装
+
+在 Claude Code、Codex 等支持 Agent Skills 的工具里直接说：
+
+```
+帮我安装这个 skill：https://github.com/jfojfo/daily-skills/tree/main/<skill-name>
+```
+
+Agent 会自己 clone 到对应目录，不用管路径。
+
+### 方式二：clone + 软链
+
+自己还要改 skill 就用这种，仓库里一改所有 agent 立刻生效，不用重新拷贝：
+
+```bash
+git clone https://github.com/jfojfo/daily-skills.git
+cd daily-skills && REPO=$(pwd)
+SKILL=infographic-gen   # 想装哪个就写哪个：infographic-gen、cli-dispatch、…
+
+# Claude Code
+ln -s "$REPO/$SKILL" ~/.claude/skills/$SKILL
+
+# Codex
+ln -s "$REPO/$SKILL" ~/.codex/skills/$SKILL
+
+# Qoder
+ln -s "$REPO/$SKILL" ~/.qoder/skills/$SKILL
+```
+
+### 卸载
+
+卸载删软链就行，不影响仓库：`rm ~/.claude/skills/<skill-name>`
+
+### Agent 不支持 Skill 怎么办
+
+把 `<skill-name>/SKILL.md` 全文下载下来，当项目规则文件用，或直接贴进对话让 agent 照着执行，效果一致——skill 本身就是一份结构化指令，不依赖任何运行时。
 
 ## License
 
