@@ -66,7 +66,7 @@ The sample library covers different subjects, languages, aspect ratios, informat
 | Variable | Purpose | Required |
 | --- | --- | --- |
 | `DASHSCOPE_API_KEY` | Alibaba Cloud Model Studio (qwen-image-3.0-pro), the default provider for infographic-gen | Yes |
-| `SENSENOVA_KEY` | SenseNova (sensenova-u1-fast), the alternative provider | Optional |
+| `SENSENOVA_API_KEY` | SenseNova (sensenova-u1-fast), the alternative provider | Optional |
 
 Put them in `~/.zshrc` to persist. All three scripts check for the key before sending a request and exit telling you which variable is missing, so they never call the API with an empty key. **Image generation costs money or burns free quota** — check your balance before batch-running the sample library.
 

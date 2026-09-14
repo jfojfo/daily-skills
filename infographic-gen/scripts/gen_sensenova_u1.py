@@ -2,9 +2,9 @@
 """调用 sensenova-u1-fast 生成信息图(商汤日日新, OpenAI 兼容).
 
 用法:
-  export SENSENOVA_KEY=sk-...                              # 平台 API key
-  export SENSENOVA_GATEWAY=https://token.sensenova.cn/v1   # 可选, 默认就是这个
-  export SENSENOVA_WATERMARK=false                         # 可选, 默认去水印; true 加官方 Logo 水印
+  export SENSENOVA_API_KEY=sk-...                              # 平台 API key
+  export SENSENOVA_GATEWAY=https://token.sensenova.cn/v1       # 可选, 默认就是这个
+  export SENSENOVA_WATERMARK=false                             # 可选, 默认去水印; true 加官方 Logo 水印
   python gen_sensenova_u1.py PROMPT_FILE OUT_PATH [SIZE]
 
 SIZE 默认 2752x1536 (横版三栏)。**注意分隔符是 x 不是 *(与 DashScope 的写法不同)。
@@ -55,9 +55,9 @@ def main():
     prompt_file, out_path = sys.argv[1], sys.argv[2]
     size = sys.argv[3] if len(sys.argv) > 3 else "2752x1536"
 
-    api_key = os.environ.get("SENSENOVA_KEY")
+    api_key = os.environ.get("SENSENOVA_API_KEY")
     if not api_key:
-        print("[err] SENSENOVA_KEY env var required", file=sys.stderr)
+        print("[err] SENSENOVA_API_KEY env var required", file=sys.stderr)
         sys.exit(2)
 
     # watermark=false 去水印(公测免费, 后续转付费); 显式传参避免官方默认值变更影响结果

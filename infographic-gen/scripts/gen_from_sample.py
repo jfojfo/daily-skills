@@ -6,7 +6,7 @@
   python gen_from_sample.py <INDEX> <OUT_PATH> [--provider qwen|sensenova]
 
 默认 provider=qwen (qwen-image-3.0-pro)。
-sensenova 走商汤日日新 (token.sensenova.cn), 需要 SENSENOVA_KEY;
+sensenova 走商汤日日新 (token.sensenova.cn), 需要 SENSENOVA_API_KEY;
 自建 OpenAI 兼容网关可用 SENSENOVA_GATEWAY 覆盖 base_url。
 
 样本里自带 width/height, 脚本会按样本指定尺寸出图。
@@ -97,9 +97,9 @@ def gen_qwen(sample, out_path):
 
 
 def gen_sensenova(sample, out_path):
-    api_key = os.environ.get("SENSENOVA_KEY")
+    api_key = os.environ.get("SENSENOVA_API_KEY")
     if not api_key:
-        sys.exit("[err] SENSENOVA_KEY env var required")
+        sys.exit("[err] SENSENOVA_API_KEY env var required")
     size = f"{sample['width']}x{sample['height']}"  # sensenova 用 x
     endpoint = resolve_sensenova_endpoint()
     payload = {

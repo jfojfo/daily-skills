@@ -5,13 +5,13 @@
 | Provider | 模型 | 环境变量 | 默认尺寸 | 适用情况 |
 |---|---|---|---|---|
 | `qwen`（默认） | `qwen-image-3.0-pro` | `DASHSCOPE_API_KEY` | `2560*1440` | 文字密度较高的常规信息图 |
-| `sensenova` | `sensenova-u1-fast` | `SENSENOVA_KEY` | `2752x1536` | 需要 OpenAI images API 兼容接入或 qwen 不可用 |
+| `sensenova` | `sensenova-u1-fast` | `SENSENOVA_API_KEY` | `2752x1536` | 需要 OpenAI images API 兼容接入或 qwen 不可用 |
 
 只配置实际使用的 provider。API key 只从环境变量读取，不要写入仓库、prompt、日志或最终答复。生成调用可能产生费用；批量生成前确认范围。
 
 ```bash
 export DASHSCOPE_API_KEY=sk-xxxx
-export SENSENOVA_KEY=sk-xxxx
+export SENSENOVA_API_KEY=sk-xxxx
 ```
 
 如果模型可用性、定价或额度影响决策，先查看 provider 的最新官方信息。
@@ -87,7 +87,7 @@ export SENSENOVA_WATERMARK=true   # 恢复官方 Logo 水印
 
 脚本会自动补 `/v1`。错误处理：
 
-- `[err] SENSENOVA_KEY env var required`：配置环境变量后重试。
+- `[err] SENSENOVA_API_KEY env var required`：配置环境变量后重试。
 - `auth_unavailable: no auth available`：自建网关缺少 SenseNova 上游凭证，联系网关维护方。
 - HTTP 404：检查 base URL 是否指向正确的 `/v1` 路径。
 - 空 `data`：检查模型名、网关响应和账号权限。
