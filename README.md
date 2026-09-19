@@ -12,7 +12,7 @@ Every skill follows the open [Agent Skills](https://agentskills.io) standard, so
 
 | Skill | What it does | Key needed | Docs |
 | --- | --- | --- | --- |
-| **infographic-gen** | Turns the key points of a doc / SKILL / README into an infographic while preserving the source language. Ships three three-column style templates (cute cartoon, minimal business, tech-dark HUD) plus a library of 100 sample prompts (20+ visual styles, renderable straight from an index) | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **infographic-gen** | Turns the key points of a doc / SKILL / README into an infographic while preserving the source language. Ships three three-column style templates (cute cartoon, minimal business, tech-dark HUD) plus a library of 100 sample prompts (20+ visual styles, renderable straight from an index). Set the canvas and it makes covers too: WeChat headers, Xiaohongshu covers, music / podcast covers | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
 | **cli-dispatch** | Dispatches tasks to Codex CLI (`codex exec`), Qoder CLI (`qodercli -p`), Claude Code (`claude -p`), Kimi Code (`kimi -p`), or Qwen Code (`qwen -p`) non-interactively: task-level selection of model, reasoning effort and sandbox/permission, unified result parsing, and session resume | — (local CLI login) | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
 
 ## infographic-gen
@@ -61,6 +61,27 @@ The sample library covers different subjects, languages, aspect ratios, informat
   </tr>
 </table>
 
+### Cover images
+
+The same scripts double as cover generators: state the canvas, the title copy and the margins in the prompt, and let `SIZE` decide the shape. Every size below comes from a run that actually shipped (sensenova separates with `x`, qwen with `*`; `—` means that provider has not been verified at that ratio yet) — adapt them to other platforms by ratio.
+
+| Use | Ratio | sensenova render | qwen render | Delivered |
+| --- | --- | --- | --- | --- |
+| WeChat Official Account header | 2.35:1 | `3072x1376` | `2560*1088` | `900x383` |
+| WeChat image post / Xiaohongshu cover | 3:4 portrait | `1760x2368` | — | `1080x1440` |
+| Music / podcast / album cover | 1:1 square | `2048x2048` | `1328*1328` | `1080x1080` |
+| Three-column infographic (default) | 16:9 | `2752x1536` | `2560*1440` | as needed |
+
+For very wide canvases, generate slightly taller than the target and center-crop to the exact ratio — more reliable than asking the model for 2.35:1 directly:
+
+```bash
+python3 scripts/gen_sensenova_u1.py prompts/cover.txt out/raw.png 3072x1376
+sips -c 1307 3072 out/raw.png --out out/crop.png                                        # crop to 2.35:1
+sips -s format jpeg -s formatOptions 92 -z 383 900 out/crop.png --out out/cover-900x383.jpg
+```
+
+Covers want fewer words. Put the headline in the prompt verbatim with a fixed position, leave the long explanation to the article, and proof every render — the model may alter characters, drop them, or set the same line twice.
+
 ### Environment variables
 
 | Variable | Purpose | Required |
@@ -82,6 +103,9 @@ Turn the code architecture into an architecture infographic
 Generate a tech-dark style architecture infographic
 Render sample #13 from the prompt library
 Same content again with sensenova so I can compare
+Cut a 2.35:1 WeChat header for this article, headline "..."
+Make a 3:4 portrait Xiaohongshu cover, keep the text minimal
+Design a 1:1 album cover for this EP, dark and minimal
 ```
 
 You can also name it explicitly: type `$infographic-gen` in Codex, or just say "use infographic-gen" in Claude Code / Qoder.

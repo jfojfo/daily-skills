@@ -12,7 +12,7 @@
 
 | Skill | 做什么 | 需要的 key | 详细文档 |
 | --- | --- | --- | --- |
-| **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图） | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图）。指定画幅后同样能出封面图：微信公众号头图、小红书封面、音乐 / 播客封面等 | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
 | **cli-dispatch** | 向 Codex CLI（`codex exec`）、Qoder CLI（`qodercli -p`）、Claude Code（`claude -p`）、Kimi Code（`kimi -p`）或 Qwen Code（`qwen -p`）非交互派发任务：按任务级别选模型、推理力度和沙箱/权限，统一解析结果，支持会话续跑 | —（本地 CLI 登录态） | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
 
 ## infographic-gen
@@ -61,6 +61,27 @@
   </tr>
 </table>
 
+### 封面图
+
+同一套脚本换掉尺寸参数就是封面生成器：prompt 里写清画幅、标题文字和留白，`SIZE` 决定形状。下表尺寸都来自实际跑通的出图（sensenova 用 `x` 分隔，qwen 用 `*`；`—` 表示该 provider 这一档还没验证过），换平台时按同样画幅换算即可。
+
+| 用途 | 画幅 | sensenova 生成 | qwen 生成 | 交付尺寸 |
+| --- | --- | --- | --- | --- |
+| 微信公众号头图 | 2.35:1 | `3072x1376` | `2560*1088` | `900x383` |
+| 公众号贴图 / 小红书封面 | 3:4 竖版 | `1760x2368` | — | `1080x1440` |
+| 音乐 / 播客 / 专辑封面 | 1:1 方图 | `2048x2048` | `1328*1328` | `1080x1080` |
+| 三栏信息图（默认） | 16:9 | `2752x1536` | `2560*1440` | 按需缩放 |
+
+超宽画幅建议先生成得略高一点，再居中裁到精确比例，比直接要求模型出 2.35:1 更稳：
+
+```bash
+python3 scripts/gen_sensenova_u1.py prompts/cover.txt out/raw.png 3072x1376
+sips -c 1307 3072 out/raw.png --out out/crop.png                                        # 裁成 2.35:1
+sips -s format jpeg -s formatOptions 92 -z 383 900 out/crop.png --out out/cover-900x383.jpg
+```
+
+封面文字要少。主标题逐字写进 prompt 并指定位置，长说明留给正文；成图必须逐字验收，模型可能改字、漏字或把同一句排两遍。
+
 ### 环境变量
 
 | 变量 | 用途 | 必需性 |
@@ -82,6 +103,9 @@
 生成一张科技深色风格的架构信息图
 按样本库第 13 条的风格出一张图
 同样的内容，用 sensenova 再出一版对比一下。
+给这篇公众号文章配一张 2.35:1 头图，标题是「……」
+做一张小红书封面，3:4 竖版，字少一点
+帮这张 EP 做一张 1:1 专辑封面，深色极简
 ```
 
 也可以显式点名：Codex 里打 `$infographic-gen`，Claude Code / Qoder 里直接说“用 infographic-gen”。

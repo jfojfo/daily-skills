@@ -1,6 +1,6 @@
 ---
 name: infographic-gen
-description: 将 SKILL、README、技术规范、产品说明、周报等文本提炼为结构清晰的信息图，并通过内置模板或样本库生成图片。支持可爱卡通、极简商务、科技深色 HUD 三种模板，以及 qwen-image-3.0-pro 和 sensenova-u1.5-fast 两个 provider。用于“把文档做成信息图/海报/导读图/cheat sheet”“生成三栏总结图”“用某种视觉风格呈现要点”等请求。
+description: 将 SKILL、README、技术规范、产品说明、周报等文本提炼为结构清晰的信息图，并通过内置模板或样本库生成图片。支持可爱卡通、极简商务、科技深色 HUD 三种模板，以及 qwen-image-3.0-pro 和 sensenova-u1.5-fast 两个 provider，画幅可指定。用于“把文档做成信息图/海报/导读图/cheat sheet”“生成三栏总结图”“用某种视觉风格呈现要点”等请求，也用于封面图：微信公众号头图、小红书封面、音乐 / 播客专辑封面。
 ---
 
 # 信息图生成
