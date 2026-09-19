@@ -66,7 +66,7 @@
 | 变量 | 用途 | 必需性 |
 | --- | --- | --- |
 | `DASHSCOPE_API_KEY` | 阿里云百炼（qwen-image-3.0-pro），infographic-gen 的默认 provider | 必需 |
-| `SENSENOVA_API_KEY` | 商汤日日新（sensenova-u1-fast），备选 provider | 可选 |
+| `SENSENOVA_API_KEY` | 商汤日日新（sensenova-u1.5-fast），备选 provider | 可选 |
 
 写进 `~/.zshrc` 可持久化。三个脚本都在发请求前检查 key，缺失就退出并说明缺哪个变量，不会拿空 key 去打接口。**图像生成接口会产生费用或消耗免费额度**，批量跑样本库前先确认额度。
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""调用 sensenova-u1-fast 生成信息图(商汤日日新, OpenAI 兼容).
+"""调用 sensenova-u1.5-fast 生成信息图(商汤日日新, OpenAI 兼容).
 
 用法:
   export SENSENOVA_API_KEY=sk-...                              # 平台 API key
@@ -20,7 +20,7 @@ import sys
 import urllib.error
 import urllib.request
 
-MODEL = "sensenova-u1-fast"
+MODEL = "sensenova-u1.5-fast"
 DEFAULT_BASE = "https://token.sensenova.cn/v1"
 
 

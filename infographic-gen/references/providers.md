@@ -5,7 +5,7 @@
 | Provider | 模型 | 环境变量 | 默认尺寸 | 适用情况 |
 |---|---|---|---|---|
 | `qwen`（默认） | `qwen-image-3.0-pro` | `DASHSCOPE_API_KEY` | `2560*1440` | 文字密度较高的常规信息图 |
-| `sensenova` | `sensenova-u1-fast` | `SENSENOVA_API_KEY` | `2752x1536` | 需要 OpenAI images API 兼容接入或 qwen 不可用 |
+| `sensenova` | `sensenova-u1.5-fast` | `SENSENOVA_API_KEY` | `2752x1536` | 需要 OpenAI images API 兼容接入或 qwen 不可用 |
 
 只配置实际使用的 provider。API key 只从环境变量读取，不要写入仓库、prompt、日志或最终答复。生成调用可能产生费用；批量生成前确认范围。
 

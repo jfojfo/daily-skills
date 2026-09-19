@@ -26,7 +26,7 @@ SAMPLES_PATH = os.path.join(
 
 QWEN_URL = "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation"
 QWEN_MODEL = "qwen-image-3.0-pro"
-SENSENOVA_MODEL = "sensenova-u1-fast"
+SENSENOVA_MODEL = "sensenova-u1.5-fast"
 SENSENOVA_BASE = "https://token.sensenova.cn/v1"
 
 
