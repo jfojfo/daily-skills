@@ -12,10 +12,28 @@ Every skill follows the open [Agent Skills](https://agentskills.io) standard, so
 
 | Skill | What it does | Key needed | Docs |
 | --- | --- | --- | --- |
-| **infographic-gen** | Turns the key points of a doc / SKILL / README into an infographic while preserving the source language. Ships three three-column style templates (cute cartoon, minimal business, tech-dark HUD) plus a library of 100 sample prompts (20+ visual styles, renderable straight from an index). Set the canvas and it makes covers too: WeChat headers, Xiaohongshu covers, music / podcast covers | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **infographic-gen** | Turns the key points of a doc / SKILL / README into an infographic while preserving the source language. Ships three three-column style templates (cute cartoon, minimal business, tech-dark HUD) plus a library of 100 sample prompts (20+ visual styles, renderable straight from an index). Set the canvas and it makes covers too: WeChat headers, Xiaohongshu covers, music / podcast covers | Choose one: `DASHSCOPE_API_KEY` or `SENSENOVA_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
 | **cli-dispatch** | Dispatches tasks to Codex CLI (`codex exec`), Qoder CLI (`qodercli -p`), Claude Code (`claude -p`), Kimi Code (`kimi -p`), or Qwen Code (`qwen -p`) non-interactively: task-level selection of model, reasoning effort and sandbox/permission, unified result parsing, and session resume | — (local CLI login) | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
+| **qoder-import-cli-session** | Makes a terminal `qodercli` session appear in the Qoder desktop sidebar, so you can open and read its history in the app | None. Qoder must be installed locally | [qoder-import-cli-session/SKILL.md](qoder-import-cli-session/SKILL.md) |
 
 ## infographic-gen
+
+### How to use it
+
+Install the skill, configure one image service, then give the agent your source material and describe the result you want. Useful details include the audience, where the image will be published, the style, the aspect ratio, and any title that must appear exactly.
+
+- Turn our team wiki's onboarding guide into a cute cartoon infographic.
+- Summarize this document as a minimal business infographic for next week's review, in landscape format.
+- Make a tech-dark architecture infographic from this gateway design document.
+- Use the style of sample 13 from the [sample library](infographic-gen/references/sample-library.md).
+- Make another version with sensenova so I can compare them.
+- Create a 2.35:1 WeChat header for this article with the title "...".
+- Make a 3:4 Xiaohongshu cover with very little text.
+- Design a dark, minimal 1:1 album cover for this EP.
+
+You can also name it explicitly: type `$infographic-gen` in Codex, or just say "use infographic-gen" in Claude Code / Qoder.
+
+infographic-gen keeps the source language by default. The agent extracts the main points, generates the image, checks its text and layout, and returns the finished file. Image models can still struggle with dense or exact wording. If every character must be perfect, use an editable design or typesetting workflow instead.
 
 ### Built-in templates
 
@@ -63,58 +81,27 @@ The sample library covers different subjects, languages, aspect ratios, informat
 
 ### Cover images
 
-The same scripts double as cover generators: state the canvas, the title copy and the margins in the prompt, and let `SIZE` decide the shape. Every size below comes from a run that actually shipped (sensenova separates with `x`, qwen with `*`; `—` means that provider has not been verified at that ratio yet) — adapt them to other platforms by ratio.
+infographic-gen can also make cover images. Tell the agent where the image will be used, the exact title, and the style you want. The agent handles the canvas size, cropping, and export.
 
-| Use | Ratio | sensenova render | qwen render | Delivered |
-| --- | --- | --- | --- | --- |
-| WeChat Official Account header | 2.35:1 | `3072x1376` | `2560*1088` | `900x383` |
-| WeChat image post / Xiaohongshu cover | 3:4 portrait | `1760x2368` | — | `1080x1440` |
-| Music / podcast / album cover | 1:1 square | `2048x2048` | `1328*1328` | `1080x1080` |
-| Three-column infographic (default) | 16:9 | `2752x1536` | `2560*1440` | as needed |
-
-For very wide canvases, generate slightly taller than the target and center-crop to the exact ratio — more reliable than asking the model for 2.35:1 directly:
-
-```bash
-python3 scripts/gen_sensenova_u1.py prompts/cover.txt out/raw.png 3072x1376
-sips -c 1307 3072 out/raw.png --out out/crop.png                                        # crop to 2.35:1
-sips -s format jpeg -s formatOptions 92 -z 383 900 out/crop.png --out out/cover-900x383.jpg
-```
-
-Covers want fewer words. Put the headline in the prompt verbatim with a fixed position, leave the long explanation to the article, and proof every render — the model may alter characters, drop them, or set the same line twice.
-
-### Environment variables
-
-| Variable | Purpose | Required |
+| Use | Ratio | Typical final size |
 | --- | --- | --- |
-| `DASHSCOPE_API_KEY` | Alibaba Cloud Model Studio (qwen-image-3.0-pro), the default provider for infographic-gen | Yes |
-| `SENSENOVA_API_KEY` | SenseNova (sensenova-u1.5-fast), the alternative provider | Optional |
+| WeChat Official Account header | 2.35:1 | 900 × 383 |
+| WeChat image post / Xiaohongshu cover | 3:4 portrait | 1080 × 1440 |
+| Music, podcast, or album cover | 1:1 square | 1080 × 1080 |
+| Standard infographic | 16:9 landscape | Based on your use |
 
-Put them in `~/.zshrc` to persist. All three scripts check for the key before sending a request and exit telling you which variable is missing, so they never call the API with an empty key. **Image generation costs money or burns free quota** — check your balance before batch-running the sample library.
+Covers work best with a short headline. Give the title exactly as it should appear and leave longer explanations in the article or post. Image models can misspell, omit, or repeat text, so the agent should inspect the final image before returning it.
 
-### How to trigger it
+### Choose an image service
 
-Once installed and the key is set, just ask in natural language; the agent matches on the skill's `description`:
+infographic-gen supports two image services. Configure one of them:
 
-```
-Turn our team wiki's onboarding guide into a cute cartoon-style infographic
-Summarize this doc into a minimal business-style infographic, landscape, for next week's review
-Make a tech-dark HUD infographic from this gateway design doc, for the architecture review
-Turn the code architecture into an architecture infographic
-Generate a tech-dark style architecture infographic
-Render sample #13 from the prompt library
-Same content again with sensenova so I can compare
-Cut a 2.35:1 WeChat header for this article, headline "..."
-Make a 3:4 portrait Xiaohongshu cover, keep the text minimal
-Design a 1:1 album cover for this EP, dark and minimal
-```
+| Service | Key | When to choose it |
+| --- | --- | --- |
+| qwen, the default | `DASHSCOPE_API_KEY` | General infographics, especially layouts with more text |
+| sensenova | `SENSENOVA_API_KEY` | An alternative when you prefer SenseNova or qwen is unavailable |
 
-You can also name it explicitly: type `$infographic-gen` in Codex, or just say "use infographic-gen" in Claude Code / Qoder.
-
-Note on language: infographic-gen preserves the language of the source content by default. The bundled examples include Chinese, English, and mixed-language layouts; the image models may still misspell or distort dense text, so always inspect the final render.
-
-### A note on repo size
-
-The comparison examples under `infographic-gen/examples/` account for most of the repo. If you only want the docs, shallow-clone it: `git clone --depth 1`.
+Only one key is needed. Save it in your local environment rather than pasting it into a prompt or document. If you have only configured SenseNova, mention sensenova in your request because qwen is the default. Image generation may use paid balance or free quota, so check your account before requesting a large batch.
 
 ## cli-dispatch
 
@@ -143,6 +130,26 @@ You can also name it explicitly: just say "Use the cli-dispatch skill to dispatc
 
 `scripts/parse_events.py` normalizes all five event-stream formats into one JSON object (`session_id`, `answer`, `usage`, `errors`, `success`), so the dispatch side looks the same whichever CLI runs the task — including the odd ones out: qwen's `-o json` emits a JSON array, and kimi's stream has no `result` line at all. Sessions persist by default on every backend, so follow-ups reuse the full context instead of starting over. Requires only that the target CLI is installed and logged in — no API key.
 
+## qoder-import-cli-session
+
+Sessions started with `qodercli` do not normally appear in the Qoder desktop app. This skill imports an existing terminal session into the app sidebar, where you can open it and read the full conversation history.
+
+Ask your agent in plain language:
+
+```
+Import this qodercli session into the Qoder desktop app
+Import my latest qodercli session into the Qoder app
+Make the Qoder session I just used in the terminal appear in the app sidebar
+```
+
+The agent will find the session, check that it is safe to import, create backups, and add it to Qoder. When prompted, reopen Qoder and click the imported session once so the app can load its history. The agent can then verify that the import worked.
+
+Before importing, fully quit the Qoder desktop app and stop the source `qodercli` session. The same project folder also needs at least one existing conversation created in the desktop app. If there is none, open that folder in Qoder, start a temporary conversation, then quit the app and ask the agent to import again.
+
+Use the imported session for reading in the desktop app. To continue the conversation, return to the terminal and resume it with `qodercli`. The agent can also undo the import if you no longer want it in the sidebar.
+
+Currently verified with Qoder.app 0.3.4 and qodercli 1.1.61. Ask the agent to check compatibility again after upgrading Qoder.
+
 ## Installation
 
 ### Option 1: let the agent install it
@@ -162,7 +169,7 @@ Use this if you also want to edit the skill: change it once in the repo and ever
 ```bash
 git clone https://github.com/jfojfo/daily-skills.git
 cd daily-skills && REPO=$(pwd)
-SKILL=infographic-gen   # set to the skill you want: infographic-gen, cli-dispatch, ...
+SKILL=infographic-gen   # infographic-gen, cli-dispatch, qoder-import-cli-session, ...
 
 # Claude Code
 ln -s "$REPO/$SKILL" ~/.claude/skills/$SKILL

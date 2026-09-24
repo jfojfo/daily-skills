@@ -12,10 +12,28 @@
 
 | Skill | 做什么 | 需要的 key | 详细文档 |
 | --- | --- | --- | --- |
-| **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图）。指定画幅后同样能出封面图：微信公众号头图、小红书封面、音乐 / 播客封面等 | `DASHSCOPE_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
+| **infographic-gen** | 把文档 / SKILL / README 的要点生成信息图，默认沿用源材料语言。内置可爱卡通、极简商务、科技深色 HUD 三种三栏风格模板，另附 100 条样本 prompt 库（20+ 种视觉风格，可按序号直接出图）。指定画幅后同样能出封面图：微信公众号头图、小红书封面、音乐 / 播客封面等 | 二选一：`DASHSCOPE_API_KEY` 或 `SENSENOVA_API_KEY` | [infographic-gen/SKILL.md](infographic-gen/SKILL.md) |
 | **cli-dispatch** | 向 Codex CLI（`codex exec`）、Qoder CLI（`qodercli -p`）、Claude Code（`claude -p`）、Kimi Code（`kimi -p`）或 Qwen Code（`qwen -p`）非交互派发任务：按任务级别选模型、推理力度和沙箱/权限，统一解析结果，支持会话续跑 | —（本地 CLI 登录态） | [cli-dispatch/SKILL.md](cli-dispatch/SKILL.md) |
+| **qoder-import-cli-session** | 让终端里的 `qodercli` 会话出现在 Qoder 桌面 App 侧栏，可以直接打开查看完整历史消息 | 不需要，本机安装了 Qoder 即可 | [qoder-import-cli-session/SKILL.md](qoder-import-cli-session/SKILL.md) |
 
 ## infographic-gen
+
+### 怎么使用
+
+安装 skill 并配置好一种出图服务后，把源材料交给 Agent，再说明想要的结果。可以补充目标读者、发布平台、风格、画幅，以及必须准确出现的标题。
+
+- 帮我把团队 wiki 的新人指南做成可爱卡通风信息图。
+- 把这份文档整理成一张极简商务信息图，下周述职用，横版。
+- 把这份网关设计文档做成科技深色风格的架构信息图。
+- 按[样本库](infographic-gen/references/sample-library.md)第 13 条的风格出一张图。
+- 同样的内容，用 sensenova 再出一版对比。
+- 给这篇文章做一张 2.35:1 的公众号头图，标题是「……」。
+- 做一张 3:4 的小红书封面，文字尽量少。
+- 给这张 EP 设计一张 1:1 的专辑封面，深色极简风格。
+
+也可以显式点名：Codex 里打 `$infographic-gen`，Claude Code / Qoder 里直接说“用 infographic-gen”。
+
+infographic-gen 默认沿用源材料的语言。Agent 会提取重点、生成图片、检查文字和版式，再交付最终文件。图像模型仍可能处理不好密集文字或需要逐字准确的内容。如果每个字都不能出错，更适合改用可编辑的设计或排版工具。
 
 ### 内置模板
 
@@ -63,58 +81,27 @@
 
 ### 封面图
 
-同一套脚本换掉尺寸参数就是封面生成器：prompt 里写清画幅、标题文字和留白，`SIZE` 决定形状。下表尺寸都来自实际跑通的出图（sensenova 用 `x` 分隔，qwen 用 `*`；`—` 表示该 provider 这一档还没验证过），换平台时按同样画幅换算即可。
+infographic-gen 也能生成封面图。告诉 Agent 图片要发到哪里、标题的准确文字和想要的风格，尺寸、裁剪和导出都由 Agent 处理。
 
-| 用途 | 画幅 | sensenova 生成 | qwen 生成 | 交付尺寸 |
-| --- | --- | --- | --- | --- |
-| 微信公众号头图 | 2.35:1 | `3072x1376` | `2560*1088` | `900x383` |
-| 公众号贴图 / 小红书封面 | 3:4 竖版 | `1760x2368` | — | `1080x1440` |
-| 音乐 / 播客 / 专辑封面 | 1:1 方图 | `2048x2048` | `1328*1328` | `1080x1080` |
-| 三栏信息图（默认） | 16:9 | `2752x1536` | `2560*1440` | 按需缩放 |
-
-超宽画幅建议先生成得略高一点，再居中裁到精确比例，比直接要求模型出 2.35:1 更稳：
-
-```bash
-python3 scripts/gen_sensenova_u1.py prompts/cover.txt out/raw.png 3072x1376
-sips -c 1307 3072 out/raw.png --out out/crop.png                                        # 裁成 2.35:1
-sips -s format jpeg -s formatOptions 92 -z 383 900 out/crop.png --out out/cover-900x383.jpg
-```
-
-封面文字要少。主标题逐字写进 prompt 并指定位置，长说明留给正文；成图必须逐字验收，模型可能改字、漏字或把同一句排两遍。
-
-### 环境变量
-
-| 变量 | 用途 | 必需性 |
+| 用途 | 画幅 | 常用成品尺寸 |
 | --- | --- | --- |
-| `DASHSCOPE_API_KEY` | 阿里云百炼（qwen-image-3.0-pro），infographic-gen 的默认 provider | 必需 |
-| `SENSENOVA_API_KEY` | 商汤日日新（sensenova-u1.5-fast），备选 provider | 可选 |
+| 微信公众号头图 | 2.35:1 | 900 × 383 |
+| 公众号贴图 / 小红书封面 | 3:4 竖版 | 1080 × 1440 |
+| 音乐 / 播客 / 专辑封面 | 1:1 方图 | 1080 × 1080 |
+| 常规信息图 | 16:9 横版 | 按使用场景确定 |
 
-写进 `~/.zshrc` 可持久化。三个脚本都在发请求前检查 key，缺失就退出并说明缺哪个变量，不会拿空 key 去打接口。**图像生成接口会产生费用或消耗免费额度**，批量跑样本库前先确认额度。
+封面上的文字越少越稳。标题要逐字告诉 Agent，长说明留在文章或帖子里。图像模型可能改字、漏字或重复排版，因此 Agent 需要检查最终图片后再交付。
 
-### 怎么触发
+### 选择出图服务
 
-装好并配完 key，用自然语言说就行，agent 靠 `description` 自动匹配：
+infographic-gen 支持两种出图服务，配置其中一个即可：
 
-```
-帮我把团队 wiki 的新人指南做成可爱卡通风
-把这份文档的要点整理成一张商务风信息图，下周述职用，横版
-这份网关设计文档，出一张科技深色 HUD 风格的信息图，给架构评审会用
-把代码架构整理成架构信息图
-生成一张科技深色风格的架构信息图
-按样本库第 13 条的风格出一张图
-同样的内容，用 sensenova 再出一版对比一下。
-给这篇公众号文章配一张 2.35:1 头图，标题是「……」
-做一张小红书封面，3:4 竖版，字少一点
-帮这张 EP 做一张 1:1 专辑封面，深色极简
-```
+| 服务 | Key | 适合场景 |
+| --- | --- | --- |
+| qwen，默认服务 | `DASHSCOPE_API_KEY` | 常规信息图，尤其是文字较多的版式 |
+| sensenova | `SENSENOVA_API_KEY` | 偏好 SenseNova，或 qwen 暂时不可用时 |
 
-也可以显式点名：Codex 里打 `$infographic-gen`，Claude Code / Qoder 里直接说“用 infographic-gen”。
-
-语言说明：infographic-gen 默认沿用源内容的语言。内置示例同时包含中文、英文和中英混排；图像模型仍可能在高密度文字中产生错字或变形，生成后需要验收成图。
-
-### 仓库体积说明
-
-`infographic-gen/examples/` 下的对比示例图是仓库的主要体积来源。只想看文档不需要示例图时可以浅克隆：`git clone --depth 1`。
+只需要一个 key。请把它保存在本机环境中，不要贴进对话、文档或仓库。如果只配置了 SenseNova，需要在请求中说明使用 sensenova，因为默认服务是 qwen。出图可能产生费用或消耗免费额度，批量生成前先确认账户余额。
 
 ## cli-dispatch
 
@@ -143,6 +130,26 @@ sips -s format jpeg -s formatOptions 92 -z 383 900 out/crop.png --out out/cover-
 
 `scripts/parse_events.py` 把五种后端的事件流统一解析成同一个 JSON 对象（`session_id`、`answer`、`usage`、`errors`、`success`），派发侧代码不因后端而异——包括两个特例：qwen 的 `-o json` 输出的是 JSON 数组，kimi 的流里根本没有 `result` 行。所有后端的会话默认持久，后续追问直接复用完整上下文，不必重起。只要求目标 CLI 已安装并登录，不需要 API key。
 
+## qoder-import-cli-session
+
+用 `qodercli` 在终端发起的会话，通常不会出现在 Qoder 桌面 App 里。这个 skill 可以把已有的终端会话导入 App 侧栏，导入后可以直接打开并查看完整对话记录。
+
+直接用自然语言告诉 Agent：
+
+```
+把这条 qodercli 会话导入 Qoder 桌面 App
+把我最近一条 qodercli 会话导入 Qoder App
+让刚才在终端使用的 Qoder 会话出现在 App 侧栏
+```
+
+Agent 会找到目标会话，检查当前是否适合导入，做好备份，再把它添加到 Qoder。看到提示后，重新打开 Qoder 并点击一次导入的会话，让 App 加载历史消息。之后 Agent 可以继续帮你确认是否导入成功。
+
+导入前需要完全退出 Qoder 桌面 App，并停止正在运行的源 `qodercli` 会话。同一个项目目录还要在桌面 App 里至少有一条现成会话。如果没有，先用 Qoder 打开这个目录，随便新建一条会话，然后退出 App，再让 Agent 导入。
+
+导入后的会话主要用于在桌面 App 中查看。要继续对话，请回到终端，用 `qodercli` 恢复原会话。如果不想继续在侧栏显示，也可以让 Agent 撤销导入。
+
+目前已在 Qoder.app 0.3.4 和 qodercli 1.1.61 上验证。升级 Qoder 后，先让 Agent 重新检查兼容性。
+
 ## 安装
 
 ### 方式一：让 Agent 自己装
@@ -162,7 +169,7 @@ Agent 会自己 clone 到对应目录，不用管路径。
 ```bash
 git clone https://github.com/jfojfo/daily-skills.git
 cd daily-skills && REPO=$(pwd)
-SKILL=infographic-gen   # 想装哪个就写哪个：infographic-gen、cli-dispatch、…
+SKILL=infographic-gen   # 可选：infographic-gen、cli-dispatch、qoder-import-cli-session、…
 
 # Claude Code
 ln -s "$REPO/$SKILL" ~/.claude/skills/$SKILL
